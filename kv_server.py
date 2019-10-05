@@ -105,12 +105,14 @@ def tcplink(coon,addr):
                     else:                                                       #如果key不存在就写入改值，并返回该值
                         cal[key] = content
                         conn.send(content.encode('utf-8'))
-                except AttributeError:
+                except AttributeError:                                              #错误命令
                     conn.send('Your command is wrong.'.encode('utf-8'))
-                except requests.exceptions.InvalidURL:
+                except requests.exceptions.InvalidURL:                              #错误网址
                     conn.send('Your website is wrong.'.encode('utf-8'))
                 except requests.exceptions.MissingSchema:
                     conn.send('Your website is wrong.'.encode('utf-8'))
+                except requests.exceptions.ConnectionError:                         #没有网络连接
+                    conn.send('You have not connect net.'.encode('utf-8'))
 
             elif d == 'NONE':
                 conn.send(' '.encode('utf-8'))
