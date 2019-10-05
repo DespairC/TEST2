@@ -15,7 +15,6 @@ else:
     h.close()
 cal = {}                         #定义储存用户key-value的字典
 account = {}                                #定义用户账号密码字典
-state = "-1"                                 #登陆状态，-1为未登录，0为已登录
 line_get = []
 f = open('auth.conf','r')
 js = f.read()
@@ -63,7 +62,7 @@ def tcplink(coon,addr):
                     p = re.compile('(.+) (.+) (.+)')
                     b = p.search(d)
                     print('执行命令SET')
-                    key = b.group(2)
+                    key = b.group(2)                    #如果 key 已经持有其他值，SET 就覆写旧值。
                     value = b.group(3)
                     cal[key] = value
                     conn.send('ok'.encode('utf-8'))
@@ -72,20 +71,17 @@ def tcplink(coon,addr):
 
             elif 'AUTH' in d:
                 try:
-                    if state == "0":
-                        print('You have entered.')
+                    p = re.compile('(.+) (.+) (.+)')
+                    b = p.search(d)
+                    print('执行命令AUTH')
+                    account_recv = b.group(2)
+                    password_recv = b.group(3)
+                    password = account[account_recv]
+                    print(password)
+                    if password_recv == password:
+                        conn.send('0'.encode('utf-8'))
                     else:
-                        p = re.compile('(.+) (.+) (.+)')
-                        b = p.search(d)
-                        print('执行命令AUTH')
-                        account_recv = b.group(2)
-                        password_recv = b.group(3)
-                        password = account[account_recv]
-                        print(password)
-                        if password_recv == password:
-                            conn.send('0'.encode('utf-8'))
-                        else:
-                            conn.send('-1'.encode('utf-8'))
+                        conn.send('-1'.encode('utf-8'))
                 except AttributeError:
                     conn.send('Your command is wrong.'.encode('utf-8'))
                 except KeyError:                                 #不存在该用户时进行提示None
@@ -103,10 +99,10 @@ def tcplink(coon,addr):
                     print(content)
                     key = b.group(2)
                     judge = key in cal.keys()
-                    if judge == True:
+                    if judge == True:                                            #如果key存在值就返回已有值
                         value = cal[key]
                         conn.send(value.encode('utf-8'))
-                    else:
+                    else:                                                       #如果key不存在就写入改值，并返回该值
                         cal[key] = content
                         conn.send(content.encode('utf-8'))
                 except AttributeError:

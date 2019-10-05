@@ -16,12 +16,12 @@ except ConnectionRefusedError:
     print('服务端地址错误或服务端尚未打开!')
     input('---------回车后退出----------')
     exit()
-while True:
+while True:                                                     #运行后循环读取用户输入
     cmd = input('请输入命令:').strip()
     try:
         if not cmd: continue
         elif state == '0' and 'URL' in cmd:                     #错误输入放到了服务端，输入错误命令会从服务端进行提示
-            pass
+            pass                                                #客户端断开后，state自然更新为-1，失去URL权限
         elif state == '-1' and 'URL' in cmd:
             cmd = 'NONE'
         client.send(cmd.encode('utf-8'))
@@ -30,14 +30,11 @@ while True:
             continue
         else:
             print(cmd_receive.decode())
-        if state == '0':
-            pass
-        else:
-            if cmd_receive.decode() == '0':                       #返回0时，状态修改，可以使用URL权限
-                state = '0'
-            else:
-                state = "-1"
+        if cmd_receive.decode() == '0':                       #返回0时，状态修改，可以使用URL权限
+            state = '0'
+        elif cmd_receive.decode() == '-1':
+            state = "-1"
     except ConnectionResetError:
-        print('>>与服务端失去连接')
+        print('>>与服务端失去连接')                             #程序应能处理连接服务器失败的情况并给出错误提示。
         exit()
 client.close()
